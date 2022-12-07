@@ -2,9 +2,13 @@
  * This file is part of the CernVM File System.
  */
 
+
 #include "magic_xattr.h"
 
+#include <limits.h>
+
 #include <cassert>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -19,11 +23,11 @@
 MagicXattrManager::MagicXattrManager(MountPoint *mountpoint,
                         EVisibility visibility,
                         const std::set<std::string> &protected_xattrs,
-                        const std::set<gid_t> &priviledged_xattr_gids)
+                        const std::set<gid_t> &privileged_xattr_gids)
   : mount_point_(mountpoint),
     visibility_(visibility),
     protected_xattrs_(protected_xattrs),
-    privileged_xattr_gids_(priviledged_xattr_gids),
+    privileged_xattr_gids_(privileged_xattr_gids),
     is_frozen_(false)
 {
   Register("user.catalog_counters", new CatalogCountersMagicXattr());
@@ -149,10 +153,26 @@ bool MagicXattrManager::IsPrivilegedGid(gid_t gid) {
   return privileged_xattr_gids_.count(gid) > 0;
 }
 
-bool BaseMagicXattr::PrepareValueFencedProtected(gid_t gid) {
-  assert(xattr_mgr_->is_frozen());
-  if (is_protected_ && !xattr_mgr_->IsPrivilegedGid(gid)) {
-    return false;
+bool BaseMagicXattr::PrepareValueFencedProtected(uid_t uid) {
+  if (is_protected_) {
+    bool is_privileged = false;
+    gid_t *group;
+    int ngroups;
+
+    group = reinterpret_cast<gid_t *>(malloc(NGROUPS_MAX *sizeof(gid_t)));
+    ngroups = getgroups(NGROUPS_MAX, group);
+    if (ngroups == -1) {
+      return false;
+    }
+    for (int i=0; i< ngroups; i++) {
+      if (xattr_mgr_->IsPrivilegedGid(group[i])) {
+         is_privileged = true;
+      }
+    }
+    free(group);
+    if (!is_privileged) {
+      return false;
+    }
   }
 
   return PrepareValueFenced();
@@ -179,7 +199,9 @@ void MagicXattrManager::SanityCheckProtectedXattrs() {
   std::set<gid_t>::const_iterator iter_gid;
   for (iter_gid = privileged_xattr_gids_.begin();
        iter_gid != privileged_xattr_gids_.end(); iter_gid++) {
-    tmp += std::to_string(*iter_gid) + ", ";
+    std::ostringstream ostr;
+    ostr << *iter_gid << ", ";
+    tmp += ostr.str();
   }
 
   if (tmp.size() > 0) {

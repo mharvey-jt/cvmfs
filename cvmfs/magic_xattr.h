@@ -61,7 +61,7 @@ class BaseMagicXattr {
   /**
    * Access right check before normal fence
   */
-  bool PrepareValueFencedProtected(gid_t gid);
+  bool PrepareValueFencedProtected(uid_t uid);
 
   /**
   * This function is used to obtain the necessary information while
