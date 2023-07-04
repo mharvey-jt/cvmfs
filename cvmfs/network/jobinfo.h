@@ -72,6 +72,9 @@ class JobInfo {
   unsigned backoff_ms_;
   unsigned int current_host_chain_index_;
 
+  // allow failure of downloads. default = false
+  bool allow_failure_;
+
  public:
   static JobInfo* CreateWithSink(const std::string *u, const bool c,
                                  const bool ph, const shash::Any *h,
@@ -148,6 +151,8 @@ class JobInfo {
   unsigned int current_host_chain_index() const {
                                              return current_host_chain_index_; }
 
+  bool allow_failure() const { return allow_failure_; }
+
   // Setter
   void SetUrl(const std::string *url) { url_ = url; }
   void SetCompressed(bool compressed) { compressed_ = compressed; }
@@ -191,6 +196,8 @@ class JobInfo {
   void SetCurrentHostChainIndex(unsigned int current_host_chain_index)
                        { current_host_chain_index_ = current_host_chain_index; }
 
+  void SetAllowFailure(bool allow_failure) { allow_failure_ = allow_failure; }
+
   JobInfo() :
     pipe_job_results(NULL),
     url_(NULL),
@@ -221,7 +228,9 @@ class JobInfo {
     num_used_hosts_(0),
     num_retries_(0),
     backoff_ms_(0),
-    current_host_chain_index_(0)
+    current_host_chain_index_(0),
+    //
+    allow_failure_(false)
   {
     memset(&zstream_, 0, sizeof(zstream_));
   }
