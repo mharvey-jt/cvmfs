@@ -57,6 +57,7 @@ if (BUILD_CVMFS OR BUILD_LIBCVMFS)
        catalog_sql.cc
        clientctx.cc
        compression.cc
+       contrib/sharding.c
        directory_entry.cc
        duplex_fuse.cc
        fetch.cc
@@ -567,6 +568,7 @@ if (BUILD_SERVER)
        catalog_virtual.cc
        clientctx.cc
        compression.cc
+       contrib/sharding.c
        directory_entry.cc
        file_chunk.cc
        gateway_util.cc
@@ -711,6 +713,7 @@ if (BUILD_SERVER)
        catalog_mgr_rw.cc
        catalog_virtual.cc
        compression.cc
+       contrib/sharding.c
        directory_entry.cc
        gateway_util.cc
        globals.cc
@@ -825,6 +828,7 @@ if (BUILD_SERVER)
        manifest.cc
        network/dns.cc
        network/download.cc
+       contrib/sharding.c
        network/jobinfo.cc
        network/sink_file.cc
        network/sink_mem.cc
@@ -1030,6 +1034,7 @@ if(BUILD_RECEIVER)
        monitor.cc
        network/dns.cc
        network/download.cc
+       contrib/sharding.c
        network/jobinfo.cc
        network/s3fanout.cc
        network/sink_file.cc
@@ -1170,6 +1175,7 @@ if (BUILD_PRELOADER)
                   catalog.cc
                   catalog_sql.cc
                   compression.cc
+                  contrib/sharding.c
                   gateway_util.cc
                   globals.cc
                   history_sql.cc

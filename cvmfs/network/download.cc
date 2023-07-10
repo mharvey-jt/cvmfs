@@ -65,6 +65,7 @@
 #include "util/prng.h"
 #include "util/smalloc.h"
 #include "util/string.h"
+#include "contrib/jumploadbalancing.h"
 
 using namespace std;  // NOLINT
 
@@ -2781,6 +2782,14 @@ void DownloadManager::UseSystemCertificatePath() {
 bool DownloadManager::SetShardingPolicy(const ShardingPolicySelector type) {
   bool success = false;
   switch (type) {
+    case kShardingPolicyExternal:  {
+      SharedPtr<JumpLoadBalancing> externalPolicy =
+                        SharedPtr<JumpLoadBalancing>(new JumpLoadBalancing());
+      health_check_ = externalPolicy;
+      sharding_policy_ = externalPolicy;
+      externalPolicy.Reset();
+      break;
+      }
     default:
       LogCvmfs(kLogDownload, kLogDebug | kLogSyslogErr,
             "Proposed sharding policy does not exist. Falling back to default");
