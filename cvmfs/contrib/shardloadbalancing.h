@@ -1,5 +1,5 @@
-#ifndef __JUMP_LOAD_BALANCING
-#define __JUMP_LOAD_BALANCING
+#ifndef __SHARD_LOAD_BALANCING
+#define __SHARD_LOAD_BALANCING
 
 #include <iostream>
 #include <algorithm>
@@ -16,33 +16,33 @@
 
 extern "C" {
 static void __log_proxy_state( const char*proxy_url,  int state,int N ) {
-LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::ProxyStateChange Proxy '%s' state=%s . There are %d proxies online", proxy_url, state==1? "ONLINE": "OFFLINE", N ); 
+LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::ProxyStateChange Proxy '%s' state=%s . There are %d proxies online", proxy_url, state==1? "ONLINE": "OFFLINE", N ); 
 }
 }
 
-class JumpLoadBalancing : public download::ShardingPolicy, public download::HealthCheck {
+class ShardLoadBalancing : public download::ShardingPolicy, public download::HealthCheck {
 
 private: 
 
 struct shard_t *shard_;
 public:
 
-JumpLoadBalancing() {
+ShardLoadBalancing() {
   shard_ = shard_init( SHARD_CONFIG_NONE );
   shard_set_logging_function( shard_, &__log_proxy_state );
 }
-~JumpLoadBalancing() {
+~ShardLoadBalancing() {
  shard_free( shard_ );
-  LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::~JumpLoadBalancing: Finished" );
+  LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::~ShardLoadBalancing: Finished" );
 }
 
 void StartHealthcheck() {
-  LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::StartHealthcheck: starting healthcheck thread" );
+  LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::StartHealthcheck: starting healthcheck thread" );
   shard_healthcheck_start(shard_);
 }
 
 void StopHealthcheck() {
-  LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::StopHealthcheck: stopping healthcheck thread" );
+  LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::StopHealthcheck: stopping healthcheck thread" );
   shard_healthcheck_stop(shard_);
 }
 
@@ -50,7 +50,7 @@ void StopHealthcheck() {
 void AddProxy( std::string proxy ) {
   shard_add_proxy( shard_, proxy.c_str() );
 
-  LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::AddProxy: Adding '%s'. There are %d proxies defined", proxy.c_str(), shard_->N );
+  LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::AddProxy: Adding '%s'. There are %d proxies defined", proxy.c_str(), shard_->N );
 }
 
 
@@ -67,7 +67,7 @@ std::string GetNextProxy( const std::string *url, std::string current_proxy, siz
  if(NULL==pref) { return ret; }
 
  if( current_proxy != "" ) {
-   LogCvmfs(kLogDownload, kLogDebug, "JumpLoadBalancing::GetNextProxy: setting proxy '%s' as down. It will be polled and returned to service automatically. There are %d proxies online ", current_proxy.c_str(), GetNumberOfProxiesOnline() );
+   LogCvmfs(kLogDownload, kLogDebug, "ShardLoadBalancing::GetNextProxy: setting proxy '%s' as down. It will be polled and returned to service automatically. There are %d proxies online ", current_proxy.c_str(), GetNumberOfProxiesOnline() );
    shard_set_proxy_offline( shard_, current_proxy.c_str() );  
  }
 
@@ -83,13 +83,13 @@ std::string GetNextProxy( const std::string *url, std::string current_proxy, siz
 
  free(pref);
 
- LogCvmfs( kLogDownload, kLogDebug, "JumpLoadBalancing::GetNextProxy: Path '%s' with offset %lu is sharded with preferred proxy '%s' (index %d) ", url->c_str(), off,  ret.c_str(), idx );
+ LogCvmfs( kLogDownload, kLogDebug, "ShardLoadBalancing::GetNextProxy: Path '%s' with offset %lu is sharded with preferred proxy '%s' (index %d) ", url->c_str(), off,  ret.c_str(), idx );
  return ret;
 }
 
 void LogProxyList() {
  for(unsigned int i=0; i<shard_->N; i++ ) {
-  LogCvmfs(kLogDownload, kLogDebug, "JumpLoadBalancing::LogProxyList %d '%s'", i,  shard_->proxy_url[i] );
+  LogCvmfs(kLogDownload, kLogDebug, "ShardLoadBalancing::LogProxyList %d '%s'", i,  shard_->proxy_url[i] );
  }
 }
 

@@ -65,7 +65,7 @@
 #include "util/prng.h"
 #include "util/smalloc.h"
 #include "util/string.h"
-#include "contrib/jumploadbalancing.h"
+#include "contrib/shardloadbalancing.h"
 
 using namespace std;  // NOLINT
 
@@ -2783,8 +2783,8 @@ bool DownloadManager::SetShardingPolicy(const ShardingPolicySelector type) {
   bool success = false;
   switch (type) {
     case kShardingPolicyExternal:  {
-      SharedPtr<JumpLoadBalancing> externalPolicy =
-                        SharedPtr<JumpLoadBalancing>(new JumpLoadBalancing());
+      SharedPtr<ShardLoadBalancing> externalPolicy =
+                        SharedPtr<ShardLoadBalancing>(new ShardLoadBalancing());
       health_check_ = externalPolicy;
       sharding_policy_ = externalPolicy;
       externalPolicy.Reset();

@@ -291,6 +291,7 @@ static void* __checker( void *d ) {
  int iter=0;                                 
  while(!ptr->healthcheck_stop) {
     int i=0;
+    int j=0;
     for(i=0; (i<ptr->N) && (!ptr->healthcheck_stop); i++ ) {
       if( ! __get_status( ptr, i ) ) { /// only check proxies which are marked as offline
         snprintf( buf, sizeof(buf)-1, "%s/healthz", ptr->proxy_url[i] );
@@ -306,7 +307,7 @@ static void* __checker( void *d ) {
         }     
       }
     }
-    for(int j=0; j<sleep_interval && !ptr->healthcheck_stop; j++) {
+    for(j=0; j<sleep_interval && !ptr->healthcheck_stop; j++) {
       sleep(1);
     }
 
